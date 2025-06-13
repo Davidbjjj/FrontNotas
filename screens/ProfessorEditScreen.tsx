@@ -11,24 +11,10 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { getDisciplinas } from '@/services/disciplinaService';
 import { updateProfessor } from '@/services/professorService';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-interface Professor {
-  id: string;
-  nome: string;
-  email: string;
-  role: string;
-  disciplinas: string[];
-  escolaNome?: string;
-}
-
-interface ProfessorEditScreenProps {
-  route: {
-    params: {
-      professor: Professor;
-    };
-  };
-  navigation: any;
-}
+type ProfessorEditScreenProps = NativeStackScreenProps<RootStackParamList, 'ProfessorEdit'>;
 
 export default function ProfessorEditScreen({ route, navigation }: ProfessorEditScreenProps) {
   const { professor } = route.params;
