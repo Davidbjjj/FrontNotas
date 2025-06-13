@@ -11,16 +11,18 @@ import CalendarioScreen from '../screens/Calendario/Calendario';
 import HeaderPerfil from '../components/HeaderPerfil';
 import EventosAluno from '@/screens/EventosAluno';
 import DisciplinasScreen from '../screens/Disciplinas/DisciplinasScreen';
-import DashboardScreen from "@/screens/Dashboard/DashboardScreen"; // Importe a tela de Disciplinas
+import DashboardScreen from "@/screens/Dashboard/DashboardScreen";
 import Sobre from '../screens/Sobre/sobreScreen';
 import ProfessorListScreen from '@/screens/ProfessorListScreen';
+import { useAuth } from '@/context/AuthContext'; 
 
-// Definindo os tipos de ícones permitidos
 type MaterialIconName = React.ComponentProps<typeof MaterialIcons>['name'];
 
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const { userRole } = useAuth(); // ✅ Adicionar
+
   return (
     <View style={{ flex: 1 }}>
       <HeaderPerfil />
@@ -45,14 +47,12 @@ function MainTabs() {
               case 'Calendário':
                 iconName = 'calendar-today';
                 break;
-
-               case 'Professores':
-                iconName = 'group'; 
-                break;    
+              case 'Professores':
+                iconName = 'group';
+                break;
               case 'Notificação':
                 iconName = focused ? 'notifications-active' : 'notifications';
                 break;
-             
             }
 
             return (
@@ -87,10 +87,15 @@ function MainTabs() {
         <Tab.Screen name="Disciplinas" component={DisciplinasScreen} />
         <Tab.Screen name="Calendário" component={CalendarioScreen} />
         <Tab.Screen name="Dashboard" component={DashboardScreen} />
-        <Tab.Screen 
-          name="Professores" 
-          component={ProfessorListScreen} 
+        
+        {/* ✅ Só mostrar se for ESCOLA */}
+        {userRole === 'ESCOLA' && (
+          <Tab.Screen 
+            name="Professores" 
+            component={ProfessorListScreen} 
           />
+        )}
+        
         <Tab.Screen 
           name="Notificação" 
           component={EventosAluno}

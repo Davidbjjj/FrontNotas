@@ -25,8 +25,6 @@ import TipoCadastro from '@/screens/TipoCadastro/TipoCadastro'
 import CadastroEscola from '@/screens/Escola/CadastroEscola';
 import { Professor } from '@/services/professorService';
 
-
-
 export type RootStackParamList = {
   SelectUser: undefined;
   Cadastro: { tipo: string };
