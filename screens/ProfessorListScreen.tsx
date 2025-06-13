@@ -10,7 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { getAllProfessores, Professor, deleteProfessor } from '../services/professorService';
+import { getAllProfessores, deleteProfessor, Professor } from '@/services/professorService';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface ProfessorListScreenProps {
   navigation: any;
@@ -40,16 +41,22 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
   useEffect(() => {
     fetchProfessores();
     
-    if (route?.params?.professorAtualizado) {
+    if (route.params?.professorAtualizado) {
       const professorAtualizado = route.params.professorAtualizado;
-      setProfessores(prev => 
-        prev.map(prof => 
-          prof.id === professorAtualizado.id ? professorAtualizado : prof
+      setProfessores(prevProfessores => 
+        prevProfessores.map(p => 
+          p.id === professorAtualizado.id ? professorAtualizado : p
         )
       );
       navigation.setParams({ professorAtualizado: undefined });
     }
-  }, [route?.params?.professorAtualizado]);
+  }, [route.params?.professorAtualizado]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchProfessores();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -61,6 +68,10 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
   };
 
   const handleDelete = (professor: Professor) => {
+    console.log('=== INÍCIO DO HANDLE DELETE ===');
+    console.log('Professor recebido:', professor);
+    console.log('ID do professor:', professor.id);
+    
     Alert.alert(
       'Excluir Professor',
       `Tem certeza que deseja excluir "${professor.nome}"?`,
@@ -69,20 +80,24 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
         { 
           text: 'Excluir', 
           style: 'destructive',
-          onPress: () => {
-            deleteProfessor(professor.id)
-              .then(() => {
-                const novosProfessores = professores.filter(p => p.id !== professor.id);
-                setProfessores(novosProfessores);
-                console.log('Professor excluído:', professor.nome);
-              })
-              .catch(err => {
-                console.error('Erro ao excluir professor:', err);
-                Alert.alert('Erro', 'Não foi possível excluir o professor');
+          onPress: async () => {
+            console.log('=== USUÁRIO CONFIRMOU DELETE ===');
+            try {
+              console.log('Tentando deletar professor ID:', professor.id);
+              await deleteProfessor(professor.id);
+              console.log('Delete realizado com sucesso!');
+              
+              setProfessores(prevProfessores => {
+                const novaLista = prevProfessores.filter(p => p.id !== professor.id);
+                console.log('Lista atualizada, professores restantes:', novaLista.length);
+                return novaLista;
               });
-            const novosProfessores = professores.filter(p => p.id !== professor.id);
-            setProfessores(novosProfessores);
-            console.log('Professor excluído:', professor.nome);
+              
+              Alert.alert('Sucesso', 'Professor excluído com sucesso!');
+            } catch (err) {
+              console.error('Erro completo ao excluir professor:', err);
+              Alert.alert('Erro', 'Não foi possível excluir o professor');
+            }
           }
         }
       ]
@@ -155,7 +170,10 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
               
               <TouchableOpacity 
                 style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => handleDelete(item)}
+                onPress={() => {
+                  console.log('Botão delete pressionado!');
+                  handleDelete(item);
+                }}
               >
                 <MaterialIcons name="delete" size={18} color="#F44336" />
               </TouchableOpacity>
