@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -34,13 +34,18 @@ export default function ProfessorEditScreen({ route, navigation }: ProfessorEdit
   const [email, setEmail] = useState(professor.email);
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState(professor.disciplinas[0] || '');
   const [showDisciplinas, setShowDisciplinas] = useState(false);
+  const [todasDisciplinasDisponiveis, setTodasDisciplinasDisponiveis] = useState(['Matemática', 'Português', 'Ciências', 'História', 'Geografia']);
 
-  let todasDisciplinasDisponiveis = ['Matemática', 'Português', 'Ciências', 'História', 'Geografia'];
+ 
+  useEffect(() => {
+    fetchDisciplinas();
+  }, []);
 
    const fetchDisciplinas = async () => {
       try {
         const data = await getDisciplinas(); 
-        todasDisciplinasDisponiveis = data.map((disciplina: { nome: string }) => disciplina.nome);
+        const disciplinasNames = data.map((disciplina: { nome: string }) => disciplina.nome);
+        setTodasDisciplinasDisponiveis(disciplinasNames);
       } catch (err) {
         console.error('Erro ao buscar disciplinas:', err);
         Alert.alert('Erro', 'Não foi possível carregar as disciplinas');
