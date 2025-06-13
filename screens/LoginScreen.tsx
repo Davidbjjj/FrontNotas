@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/AppNavigator'; // Ajuste o caminho se necessário
+import type { RootStackParamList } from '../navigation/AppNavigator'; 
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -24,7 +24,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
   try {
-    const response = await fetch('https://backnotas.onrender.com/auth/login', {
+    const response = await fetch('http://localhost:8080/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,6 +38,9 @@ export default function LoginScreen() {
 
       // Salvar token no AsyncStorage
       await AsyncStorage.setItem('authToken', data.token);
+      
+      // ✅ ÚNICA ADIÇÃO: Salvar a role
+      await AsyncStorage.setItem('userRole', data.userDetails?.role || '');
 
       // Redireciona para a tela de início
       navigation.replace('Inicio');
