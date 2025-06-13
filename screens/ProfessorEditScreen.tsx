@@ -9,6 +9,7 @@ import {
   TextInput,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getDisciplinas } from '@/services/disciplinaService';
 
 interface Professor {
   id: string;
@@ -34,14 +35,17 @@ export default function ProfessorEditScreen({ route, navigation }: ProfessorEdit
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState(professor.disciplinas[0] || '');
   const [showDisciplinas, setShowDisciplinas] = useState(false);
 
-  const todasDisciplinasDisponiveis = [
-    'Programação Mobile',
-    'Matemática',
-    'Física',
-    'Química',
-    'Banco de Dados',
-    'Algoritmos'
-  ];
+  let todasDisciplinasDisponiveis = ['Matemática', 'Português', 'Ciências', 'História', 'Geografia'];
+
+   const fetchDisciplinas = async () => {
+      try {
+        const data = await getDisciplinas(); 
+        todasDisciplinasDisponiveis = data.map((disciplina: { nome: string }) => disciplina.nome);
+      } catch (err) {
+        console.error('Erro ao buscar disciplinas:', err);
+        Alert.alert('Erro', 'Não foi possível carregar as disciplinas');
+      }
+    };  
 
   const handleSave = () => {
     if (!nome.trim() || !email.trim()) {

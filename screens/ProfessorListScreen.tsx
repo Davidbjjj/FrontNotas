@@ -10,13 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-
-interface Professor {
-  id: string;
-  nome: string;
-  email: string;
-  disciplinas: string[];
-}
+import { getAllProfessores, Professor, deleteProfessor } from '../services/professorService';
 
 interface ProfessorListScreenProps {
   navigation: any;
@@ -29,32 +23,11 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const mockProfessores: Professor[] = [
-    {
-      id: '1',
-      nome: "Prof. Marcio",
-      email: "marcio.silva@unicap.br",
-      disciplinas: [
-        "Programação Mobile",
-      ]
-    },
-    {
-      id: '2',
-      nome: "Prof. Ana",
-      email: "ana.santos@unicap.br",
-      disciplinas: [
-        "Matemática",
-        "Física"
-      ]
-    },
-  ];
-
   const fetchProfessores = async () => {
     try {
       setLoading(true);
-      // const data = await getProfessores(); 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setProfessores(mockProfessores);
+      const data = await getAllProfessores(); 
+      setProfessores(data);
       setError('');
     } catch (err) {
       setError('Erro ao carregar professores');
@@ -97,6 +70,16 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
           text: 'Excluir', 
           style: 'destructive',
           onPress: () => {
+            deleteProfessor(professor.id)
+              .then(() => {
+                const novosProfessores = professores.filter(p => p.id !== professor.id);
+                setProfessores(novosProfessores);
+                console.log('Professor excluído:', professor.nome);
+              })
+              .catch(err => {
+                console.error('Erro ao excluir professor:', err);
+                Alert.alert('Erro', 'Não foi possível excluir o professor');
+              });
             const novosProfessores = professores.filter(p => p.id !== professor.id);
             setProfessores(novosProfessores);
             console.log('Professor excluído:', professor.nome);
@@ -129,10 +112,6 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
 
   return (
     <View style={styles.container}>
-    <Text style={styles.FirstText}>Professores</Text>
-    <Text > </Text>
-
-      
       <FlatList
         data={professores}
         keyExtractor={(item) => item.id}
@@ -142,6 +121,9 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
             onRefresh={onRefresh}
             colors={['#007BFF']}
           />
+        }
+        ListHeaderComponent={
+          <Text style={styles.header}>Professores</Text>
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -199,13 +181,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
-    paddingTop: 0, 
+    paddingTop: 16, 
   },
-  FirstText: {
-    fontSize: 24,
+   header: {
+    fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 20,
     color: '#333',
-    marginTop: 16, 
   },
   subtitle: {
     fontSize: 16,

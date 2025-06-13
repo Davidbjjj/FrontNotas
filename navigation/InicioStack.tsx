@@ -13,6 +13,7 @@ import EventosAluno from '@/screens/EventosAluno';
 import DisciplinasScreen from '../screens/Disciplinas/DisciplinasScreen';
 import DashboardScreen from "@/screens/Dashboard/DashboardScreen"; // Importe a tela de Disciplinas
 import Sobre from '../screens/Sobre/sobreScreen';
+import ProfessorListScreen from '@/screens/ProfessorListScreen';
 
 // Definindo os tipos de ícones permitidos
 type MaterialIconName = React.ComponentProps<typeof MaterialIcons>['name'];
@@ -44,9 +45,14 @@ function MainTabs() {
               case 'Calendário':
                 iconName = 'calendar-today';
                 break;
+
+               case 'Professores':
+                iconName = 'group'; 
+                break;    
               case 'Notificação':
                 iconName = focused ? 'notifications-active' : 'notifications';
                 break;
+             
             }
 
             return (
@@ -81,6 +87,10 @@ function MainTabs() {
         <Tab.Screen name="Disciplinas" component={DisciplinasScreen} />
         <Tab.Screen name="Calendário" component={CalendarioScreen} />
         <Tab.Screen name="Dashboard" component={DashboardScreen} />
+        <Tab.Screen 
+          name="Professores" 
+          component={ProfessorListScreen} 
+          />
         <Tab.Screen 
           name="Notificação" 
           component={EventosAluno}
