@@ -24,7 +24,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
   try {
-    const response = await fetch('http://localhost:8080/auth/login', {
+    const response = await fetch('https://backnotas.onrender.com/auth/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -39,7 +39,6 @@ export default function LoginScreen() {
       // Salvar token no AsyncStorage
       await AsyncStorage.setItem('authToken', data.token);
       
-      // ✅ ÚNICA ADIÇÃO: Salvar a role
       await AsyncStorage.setItem('userRole', data.userDetails?.role || '');
 
       // Redireciona para a tela de início
