@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,22 +9,12 @@ import {
   TextInput,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getDisciplinas } from '@/services/disciplinaService';
+import { updateProfessor } from '@/services/professorService';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/AppNavigator';
 
-interface Professor {
-  id: string;
-  nome: string;
-  email: string;
-  disciplinas: string[];
-}
-
-interface ProfessorEditScreenProps {
-  route: {
-    params: {
-      professor: Professor;
-    };
-  };
-  navigation: any;
-}
+type ProfessorEditScreenProps = NativeStackScreenProps<RootStackParamList, 'ProfessorEdit'>;
 
 export default function ProfessorEditScreen({ route, navigation }: ProfessorEditScreenProps) {
   const { professor } = route.params;
@@ -33,39 +23,55 @@ export default function ProfessorEditScreen({ route, navigation }: ProfessorEdit
   const [email, setEmail] = useState(professor.email);
   const [disciplinaSelecionada, setDisciplinaSelecionada] = useState(professor.disciplinas[0] || '');
   const [showDisciplinas, setShowDisciplinas] = useState(false);
+  const [todasDisciplinasDisponiveis, setTodasDisciplinasDisponiveis] = useState(['Matemática', 'Português', 'Ciências', 'História', 'Geografia']);
+  
 
-  const todasDisciplinasDisponiveis = [
-    'Programação Mobile',
-    'Matemática',
-    'Física',
-    'Química',
-    'Banco de Dados',
-    'Algoritmos'
-  ];
+ 
+  useEffect(() => {
+    fetchDisciplinas();
+  }, []);
 
-  const handleSave = () => {
+   const fetchDisciplinas = async () => {
+      try {
+        const data = await getDisciplinas(); 
+        const disciplinasNames = data.map((disciplina: { nome: string }) => disciplina.nome);
+        setTodasDisciplinasDisponiveis(disciplinasNames);
+      } catch (err) {
+        console.error('Erro ao buscar disciplinas:', err);
+        Alert.alert('Erro', 'Não foi possível carregar as disciplinas');
+      }
+    };  
+
+  const handleSave = async () => {
     if (!nome.trim() || !email.trim()) {
       Alert.alert('Erro', 'Nome e email são obrigatórios');
       return;
     }
 
     const professorAtualizado = {
-      ...professor,
       nome: nome.trim(),
       email: email.trim(),
-      disciplinas: disciplinaSelecionada ? [disciplinaSelecionada] : []
+      senha : 'senha123',
+      escolaNome: professor.escolaNome || 'Escola Padrão'
     };
 
-    Alert.alert('Sucesso', 'Professor atualizado com sucesso!', [
-      { 
-        text: 'OK', 
-        onPress: () => {
-          navigation.navigate('ProfessorListScreen', { 
-            professorAtualizado: professorAtualizado 
-          });
+    console.log('ID do professor:', professor.id);
+    console.log('Dados enviados para atualização:', JSON.stringify(professorAtualizado, null, 2));
+
+    try {
+      await updateProfessor(professor.id, professorAtualizado);
+      Alert.alert('Sucesso', 'Professor atualizado com sucesso!', [
+        { 
+          text: 'OK', 
+          onPress: () => {
+            navigation.goBack();
+          }
         }
-      }
-    ]);
+      ]);
+    } catch (err) {
+      console.error('Erro ao atualizar professor:', err);
+      Alert.alert('Erro', 'Não foi possível atualizar o professor');
+    }
   };
 
   const handleCancel = () => {

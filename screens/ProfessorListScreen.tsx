@@ -10,13 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-
-interface Professor {
-  id: string;
-  nome: string;
-  email: string;
-  disciplinas: string[];
-}
+import { getAllProfessores, deleteProfessor, Professor } from '@/services/professorService';
+import { useFocusEffect } from '@react-navigation/native';
 
 interface ProfessorListScreenProps {
   navigation: any;
@@ -29,32 +24,11 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
   const [error, setError] = useState('');
   const [refreshing, setRefreshing] = useState(false);
 
-  const mockProfessores: Professor[] = [
-    {
-      id: '1',
-      nome: "Prof. Marcio",
-      email: "marcio.silva@unicap.br",
-      disciplinas: [
-        "Programação Mobile",
-      ]
-    },
-    {
-      id: '2',
-      nome: "Prof. Ana",
-      email: "ana.santos@unicap.br",
-      disciplinas: [
-        "Matemática",
-        "Física"
-      ]
-    },
-  ];
-
   const fetchProfessores = async () => {
     try {
       setLoading(true);
-      // const data = await getProfessores(); 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setProfessores(mockProfessores);
+      const data = await getAllProfessores(); 
+      setProfessores(data);
       setError('');
     } catch (err) {
       setError('Erro ao carregar professores');
@@ -67,16 +41,22 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
   useEffect(() => {
     fetchProfessores();
     
-    if (route?.params?.professorAtualizado) {
+    if (route.params?.professorAtualizado) {
       const professorAtualizado = route.params.professorAtualizado;
-      setProfessores(prev => 
-        prev.map(prof => 
-          prof.id === professorAtualizado.id ? professorAtualizado : prof
+      setProfessores(prevProfessores => 
+        prevProfessores.map(p => 
+          p.id === professorAtualizado.id ? professorAtualizado : p
         )
       );
       navigation.setParams({ professorAtualizado: undefined });
     }
-  }, [route?.params?.professorAtualizado]);
+  }, [route.params?.professorAtualizado]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchProfessores();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -88,6 +68,10 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
   };
 
   const handleDelete = (professor: Professor) => {
+    console.log('=== INÍCIO DO HANDLE DELETE ===');
+    console.log('Professor recebido:', professor);
+    console.log('ID do professor:', professor.id);
+    
     Alert.alert(
       'Excluir Professor',
       `Tem certeza que deseja excluir "${professor.nome}"?`,
@@ -96,10 +80,24 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
         { 
           text: 'Excluir', 
           style: 'destructive',
-          onPress: () => {
-            const novosProfessores = professores.filter(p => p.id !== professor.id);
-            setProfessores(novosProfessores);
-            console.log('Professor excluído:', professor.nome);
+          onPress: async () => {
+            console.log('=== USUÁRIO CONFIRMOU DELETE ===');
+            try {
+              console.log('Tentando deletar professor ID:', professor.id);
+              await deleteProfessor(professor.id);
+              console.log('Delete realizado com sucesso!');
+              
+              setProfessores(prevProfessores => {
+                const novaLista = prevProfessores.filter(p => p.id !== professor.id);
+                console.log('Lista atualizada, professores restantes:', novaLista.length);
+                return novaLista;
+              });
+              
+              Alert.alert('Sucesso', 'Professor excluído com sucesso!');
+            } catch (err) {
+              console.error('Erro completo ao excluir professor:', err);
+              Alert.alert('Erro', 'Não foi possível excluir o professor');
+            }
           }
         }
       ]
@@ -129,10 +127,6 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
 
   return (
     <View style={styles.container}>
-    <Text style={styles.FirstText}>Professores</Text>
-    <Text > </Text>
-
-      
       <FlatList
         data={professores}
         keyExtractor={(item) => item.id}
@@ -142,6 +136,9 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
             onRefresh={onRefresh}
             colors={['#007BFF']}
           />
+        }
+        ListHeaderComponent={
+          <Text style={styles.header}>Professores</Text>
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
@@ -173,7 +170,10 @@ export default function ProfessorListScreen({ navigation, route }: ProfessorList
               
               <TouchableOpacity 
                 style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => handleDelete(item)}
+                onPress={() => {
+                  console.log('Botão delete pressionado!');
+                  handleDelete(item);
+                }}
               >
                 <MaterialIcons name="delete" size={18} color="#F44336" />
               </TouchableOpacity>
@@ -199,13 +199,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f8f9fa',
     padding: 16,
-    paddingTop: 0, 
+    paddingTop: 16, 
   },
-  FirstText: {
-    fontSize: 24,
+   header: {
+    fontSize: 22,
     fontWeight: 'bold',
+    marginBottom: 20,
     color: '#333',
-    marginTop: 16, 
   },
   subtitle: {
     fontSize: 16,

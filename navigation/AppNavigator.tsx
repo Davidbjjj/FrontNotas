@@ -23,8 +23,7 @@ import ProfessorEditScreen from '@/screens/ProfessorEditScreen';
 import Sobre from '@/screens/Sobre/sobreScreen';
 import TipoCadastro from '@/screens/TipoCadastro/TipoCadastro'
 import CadastroEscola from '@/screens/Escola/CadastroEscola';
-
-
+import { Professor } from '@/services/professorService';
 
 export type RootStackParamList = {
   SelectUser: undefined;
@@ -46,9 +45,7 @@ export type RootStackParamList = {
   Sobre: undefined;
   TipoCadastro: undefined;
   CadastroEscola:undefined;
-  ProfessorEdit: { professor: { id: string; nome: string; email: string; disciplinas: string[] } };
-
-
+  ProfessorEdit: { professor: Professor };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

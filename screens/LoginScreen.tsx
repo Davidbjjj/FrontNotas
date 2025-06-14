@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/AppNavigator'; // Ajuste o caminho se necessário
+import type { RootStackParamList } from '../navigation/AppNavigator'; 
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -38,6 +38,8 @@ export default function LoginScreen() {
 
       // Salvar token no AsyncStorage
       await AsyncStorage.setItem('authToken', data.token);
+      
+      await AsyncStorage.setItem('userRole', data.userDetails?.role || '');
 
       // Redireciona para a tela de início
       navigation.replace('Inicio');
