@@ -21,8 +21,9 @@ import DashboardScreen from "@/screens/Dashboard/DashboardScreen";
 import ProfessorListScreen from '@/screens/ProfessorListScreen';
 import ProfessorEditScreen from '@/screens/ProfessorEditScreen';
 import Sobre from '@/screens/Sobre/sobreScreen';
-
-
+import TipoCadastro from '@/screens/TipoCadastro/TipoCadastro'
+import CadastroEscola from '@/screens/Escola/CadastroEscola';
+import { Professor } from '@/services/professorService';
 
 export type RootStackParamList = {
   SelectUser: undefined;
@@ -42,9 +43,9 @@ export type RootStackParamList = {
   Dashboard: undefined;
   ProfessorListScreen: undefined;
   Sobre: undefined;
-  ProfessorEdit: { professor: { id: string; nome: string; email: string; disciplinas: string[] } };
-
-
+  TipoCadastro: undefined;
+  CadastroEscola:undefined;
+  ProfessorEdit: { professor: Professor };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -59,11 +60,13 @@ export default function AppNavigator() {
       <Stack.Screen name="LoginScreen" component={LoginScreen} />
       <Stack.Screen name="ProfessorListScreen" component={ProfessorListScreen} />
       <Stack.Screen name="CadastroAluno" component={CadastroAluno} />
+      <Stack.Screen name="TipoCadastro" component={TipoCadastro} />
        <Stack.Screen 
         name="ProfessorEdit" 
         component={ProfessorEditScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen name= "CadastroEscola" component={CadastroEscola} />
       <Stack.Screen name="Sobre" component={Sobre}/>
       <Stack.Screen name="CodigoRecupera" component={CodigoRecupera} />
       <Stack.Screen name="NovaSenha" component={NovaSenha} />

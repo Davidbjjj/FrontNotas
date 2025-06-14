@@ -1,6 +1,7 @@
 // navigation/InicioStack.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -11,29 +12,46 @@ import CalendarioScreen from '../screens/Calendario/Calendario';
 import HeaderPerfil from '../components/HeaderPerfil';
 import EventosAluno from '@/screens/EventosAluno';
 import DisciplinasScreen from '../screens/Disciplinas/DisciplinasScreen';
-import DashboardScreen from "@/screens/Dashboard/DashboardScreen"; // Importe a tela de Disciplinas
+import DashboardScreen from "@/screens/Dashboard/DashboardScreen";
 import Sobre from '../screens/Sobre/sobreScreen';
+import ProfessorListScreen from '@/screens/ProfessorListScreen';
 
-// Definindo os tipos de ícones permitidos
 type MaterialIconName = React.ComponentProps<typeof MaterialIcons>['name'];
 
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  // ✅ MUDANÇA: Usar state local em vez de useAuth
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // ✅ ADIÇÃO: Carregar role do AsyncStorage
+  useEffect(() => {
+    const loadRole = async () => {
+      try {
+        const role = await AsyncStorage.getItem('userRole');
+        console.log('📱 Role carregada:', role);
+        setUserRole(role);
+      } catch (error) {
+        console.error('Erro ao carregar role:', error);
+      }
+    };
+    loadRole();
+  }, []);
+
   return (
     <View style={{ flex: 1 }}>
       <HeaderPerfil />
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size, focused }) => {
-            let iconName: MaterialIconName = 'home'; // Valor padrão
+            let iconName: MaterialIconName = 'home';
 
             switch (route.name) {
               case 'Início':
                 iconName = 'home';
                 break;
               case 'Disciplinas':
-                iconName = 'library-books'; // Ícone para Disciplinas
+                iconName = 'library-books';
                 break;
               case 'Atividades':
                 iconName = 'assignment';
@@ -43,6 +61,9 @@ function MainTabs() {
                 break;
               case 'Calendário':
                 iconName = 'calendar-today';
+                break;
+              case 'Professores':
+                iconName = 'group';
                 break;
               case 'Notificação':
                 iconName = focused ? 'notifications-active' : 'notifications';
@@ -81,6 +102,15 @@ function MainTabs() {
         <Tab.Screen name="Disciplinas" component={DisciplinasScreen} />
         <Tab.Screen name="Calendário" component={CalendarioScreen} />
         <Tab.Screen name="Dashboard" component={DashboardScreen} />
+        
+        {/* ✅ Condicional baseada no AsyncStorage */}
+        {userRole === 'ESCOLA' && (
+          <Tab.Screen 
+            name="Professores" 
+            component={ProfessorListScreen} 
+          />
+        )}
+        
         <Tab.Screen 
           name="Notificação" 
           component={EventosAluno}

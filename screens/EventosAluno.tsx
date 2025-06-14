@@ -41,7 +41,7 @@ export default function EventosAluno() {
   };
 
   const handleAddEvento = () => {
-    navigation.navigate('EventoProfessor'); // Certifique-se que esta rota está definida no seu navigator
+    navigation.navigate('EventoProfessor'); 
   };
 
   if (loading && !refreshing) {
